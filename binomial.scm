@@ -117,8 +117,10 @@ Binomial Queue Representation
     (define helper
       (lambda (minimum queue)
         (cond ((null? queue) minimum)
+              ((null? (car queue)) (helper minimum (cdr queue)))
               (else (helper (min minimum (root (car queue))) (cdr queue))))))
-    (helper (root (car queue)) (cdr queue))))
+    (cond ((null? (car queue)) (findMin (cdr queue)))
+          (else (helper (root (car queue)) (cdr queue))))))
 
 ; insert new element into queue
 (define insert
@@ -144,7 +146,8 @@ Binomial Queue Representation
   (lambda (queue)
     (define helper
       (lambda (minimum queue)
-        (cond ((= (root (car queue)) minimum) (cons '() (cdr queue)))
+        (cond ((null? (car queue)) (cons '() (helper minimum (cdr queue))))
+              ((= (root (car queue)) minimum) (cons '() (cdr queue)))
               (else (cons (car queue) (helper minimum (cdr queue)))))))
     (cond ((= (rank (find (findMin queue) queue)) 0) (helper (findMin queue) queue))
           (else (meld (helper (findMin queue) queue) (reverseq (cdr (find (findMin queue) queue))))))))
@@ -168,7 +171,8 @@ Binomial Queue Representation
 ; find tree with root n
 (define find
   (lambda (n queue)
-    (cond ((= (root (car queue)) n) (car queue))
+    (cond ((null? (car queue)) (find n (cdr queue)))
+          ((= (root (car queue)) n) (car queue))
           (else (find n (cdr queue))))))
 
 ; reverse queue
