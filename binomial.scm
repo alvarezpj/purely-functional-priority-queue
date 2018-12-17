@@ -123,12 +123,7 @@ Binomial Queue Representation
 ; insert new element into queue
 (define insert
   (lambda (element queue)
-    (define helper
-      (lambda (carry partial-sum queue)
-        (cond ((null? queue) (append partial-sum (cons carry queue)))
-              ((null? (car queue)) (append partial-sum (cons carry (cdr queue))))
-              (else (helper (link carry (car queue)) (cons '() partial-sum) (cdr queue))))))
-    (helper (list element) '() queue)))
+    (meld (list (list element)) queue)))
 
 ; merge two queues
 (define meld
