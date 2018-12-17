@@ -82,7 +82,9 @@ Binomial Tree Representation
 ; link two trees of equal rank
 (define link
   (lambda (tree1 tree2)
-    (cond ((< (root tree1) (root tree2)) (cons (root tree1) (cons tree2 (cdr tree1))))
+    (cond ((null? tree1) tree2)
+          ((null? tree2) tree1)
+          ((< (root tree1) (root tree2)) (cons (root tree1) (cons tree2 (cdr tree1))))
           (else (cons (root tree2) (cons tree1 (cdr tree2)))))))
 
 
@@ -127,3 +129,32 @@ Binomial Queue Representation
               ((null? (car queue)) (append partial-sum (cons carry (cdr queue))))
               (else (helper (link carry (car queue)) (cons '() partial-sum) (cdr queue))))))
     (helper (list element) '() queue)))
+
+; meld two queues
+(define merge
+  (lambda (queue1 queue2)
+    (define helper
+      (lambda (carry queue1 queue2)
+        (cond ((null? queue1) (cond ((null? carry) '())
+                                    (else (cons carry '()))))
+              ((or (null? (car queue1)) (null? (car queue2))) (cond ((null? carry) (cons (link (car queue1) (car queue2)) (helper '() (cdr queue1) (cdr queue2))))
+                                                                    (else (cons '() (helper (link carry (link (car queue1) (car queue2))) (cdr queue1) (cdr queue2))))))
+              (else (cons carry (helper (link (car queue1) (car queue2)) (cdr queue1) (cdr queue2)))))))
+    (cond ((< (size queue1) (size queue2)) (helper '() (extend (- (size queue2) (size queue1)) queue1) queue2))
+          (else (helper '() queue1 (- (size queue1) (size queue2))))))) 
+
+; utility functions
+; append n empty trees in front of queue
+(define extend
+  (lambda (n queue)
+    (define helper
+      (lambda (n)
+        (cond ((zero? n) '())
+              (else (cons '() (helper (- n 1)))))))
+    (append queue (helper n))))
+
+; return size of queue (number of trees it contains)
+(define size
+  (lambda (queue)
+    (cond ((null? queue) 0)
+          (else (+ 1 (size (cdr queue)))))))
