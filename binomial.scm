@@ -130,18 +130,29 @@ Binomial Queue Representation
               (else (helper (link carry (car queue)) (cons '() partial-sum) (cdr queue))))))
     (helper (list element) '() queue)))
 
-; meld two queues
-(define merge
+; merge two queues
+(define meld
   (lambda (queue1 queue2)
     (define helper
       (lambda (carry queue1 queue2)
         (cond ((null? queue1) (cond ((null? carry) '())
                                     (else (cons carry '()))))
+              ((and (null? (car queue1)) (null? (car queue2))) (cons carry (helper '() (cdr queue1) (cdr queue2))))
               ((or (null? (car queue1)) (null? (car queue2))) (cond ((null? carry) (cons (link (car queue1) (car queue2)) (helper '() (cdr queue1) (cdr queue2))))
                                                                     (else (cons '() (helper (link carry (link (car queue1) (car queue2))) (cdr queue1) (cdr queue2))))))
               (else (cons carry (helper (link (car queue1) (car queue2)) (cdr queue1) (cdr queue2)))))))
     (cond ((< (size queue1) (size queue2)) (helper '() (extend (- (size queue2) (size queue1)) queue1) queue2))
-          (else (helper '() queue1 (- (size queue1) (size queue2))))))) 
+          (else (helper '() queue1 (extend (- (size queue1) (size queue2)) queue2))))))
+
+; delete minimum element from queue
+(define deleteMin
+  (lambda (queue)
+    (define helper
+      (lambda (minimum queue)
+        (cond ((= (root (car queue)) minimum) (cons '() (cdr queue)))
+              (else (cons (car queue) (helper minimum (cdr queue)))))))
+    (cond ((= (rank (find (findMin queue) queue)) 0) (helper (findMin queue) queue))
+          (else (meld (helper (findMin queue) queue) (reverseq (cdr (find (findMin queue) queue))))))))
 
 ; utility functions
 ; append n empty trees in front of queue
@@ -158,3 +169,14 @@ Binomial Queue Representation
   (lambda (queue)
     (cond ((null? queue) 0)
           (else (+ 1 (size (cdr queue)))))))
+
+; find tree with root n
+(define find
+  (lambda (n queue)
+    (cond ((= (root (car queue)) n) (car queue))
+          (else (find n (cdr queue))))))
+
+; reverse queue
+(define reverseq
+  (lambda (queue)
+    (reverse queue)))
