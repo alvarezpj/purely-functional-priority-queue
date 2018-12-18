@@ -1,4 +1,4 @@
-; Binomial Queue
+; BINOMIAL QUEUE
 
 ; supported operations:
 ;    * findMin(q)   - return minimum element of queue q
@@ -10,62 +10,39 @@
 #|
 
 Binomial Tree Representation
-    - children maintained in decreasing order of rank (to support link operation efficiently)
+    - implemented as a list of list
+    - a tree's children are maintained in decreasing order of rank
 
-(a)                                       a (rank 0)
+(0)                                       0          (rank 0)
 
-(a (b))                                   a (rank 1)
+(0 (1))                                   0          (rank 1)
                                           |
-                                          b
+                                          1
 
-(a (c (d)) (b))                           a (rank 2)
+(0 (2 (3)) (1))                           0          (rank 2)
                                          / \
-                                        c   b
+                                        2   1
                                         |
-                                        d
+                                        3
 
-(a (e (g (h)) (f)) (c (d)) (b))           a (rank 3)
+(0 (4 (6 (7)) (5)) (2 (3)) (1))           0          (rank 3)
                                          /|\
                                         / | \
-                                       e  c  b
+                                       4  2  1
                                       /|  |
-                                     g f  d
+                                     6 5  3
                                      |
-                                     h
+                                     7
 
 |#
 
-; *may have to change representation of empty tree*
 
-; tree node definition
-; defined a (key, data) pair
-(define Node
-  (lambda (key data)
-    (list key data)))
-
-; retrieve key of node
-(define getKey
-  (lambda (node)
-    (car node)))
-
-; retrieve data of node
-(define getData
-  (lambda (node)
-    (car (cdr node))))
-
-; binomial tree definition
-; defined as list of tree nodes
-(define BinomialTree '())
-
-; NOTE: ALL OPERATIONS ASSUME TREES ARE NOT EMPTY; THAT IS, THEY CONTAIN AT LEAST ONE NODE
-
-; return root of tree in not empty
+; return root of tree
 (define root
   (lambda (tree)
     (car tree)))
 
-; return rank of binomial tree (number of children)
-; note: root node does not count
+; return rank of tree (number of children)
 (define rank
   (lambda (tree)
     (define helper
@@ -73,11 +50,6 @@ Binomial Tree Representation
         (cond ((null? children) 0)
               (else (+ 1 (helper (cdr children)))))))
     (helper (cdr tree))))
-
-; check whether two trees have equal rank
-(define equalRank?
-  (lambda (tree1 tree2)
-    (= (rank tree1) (rank tree2))))
 
 ; link two trees of equal rank
 (define link
@@ -88,28 +60,31 @@ Binomial Tree Representation
           (else (cons (root tree2) (cons tree1 (cdr tree2)))))))
 
 
+
+
 #|
 
 Binomial Queue Representation
-    - list of trees
-    - trees maintained in increasing order of rank (to support insert operation efficiently)
+    - implemented as a list of trees
+    - a queue's trees are maintained in increasing order of rank
+    - the structure of a queue resembles the binary representation of the number of elements
+      it contains (in reversed order)
 
-(() (a (b)) () (c (g (i (j)) (h)) (e (f)) (d)) --> queue containing 10 nodes
+(() (0 (1)) () (4 (8 (10 (11)) (9)) (6 (7)) (5))
 
-  |                                |
-  |  ()    a     ()          c     |
+  |                                |      -->   queue containing 10 elements
+  |  ()    0     ()          4     |
   |        |                /|\    |
-  |        b               / | \   |
-  |                       g  e  d  |
-  |                      /|  |     |
-  |                     i h  f     |
+  |        1               / | \   |
+  |                       8  6  5  |
+  |                      /\  |     |
+  |                     10 9 7     |
   |                     |          |
-  |                     j          |
+  |                     11         |
   |                                |
 
 |#
 
-; NOTE: ALL OPERATIONS ASSUME QUEUES ARE NOT EMPTY; THAT IS, THEY CONTAIN AT LEAST ONE TREE
 
 ; return minimum element of queue
 (define findMin
@@ -127,7 +102,7 @@ Binomial Queue Representation
   (lambda (element queue)
     (meld (list (list element)) queue)))
 
-; merge two queues
+; merge/meld two queues
 (define meld
   (lambda (queue1 queue2)
     (define helper
@@ -152,8 +127,7 @@ Binomial Queue Representation
     (cond ((= (rank (find (findMin queue) queue)) 0) (helper (findMin queue) queue))
           (else (meld (helper (findMin queue) queue) (reverseq (cdr (find (findMin queue) queue))))))))
 
-; utility functions
-; append n empty trees in front of queue
+; append n empty trees in front of queue (positive sign extension)
 (define extend
   (lambda (n queue)
     (define helper
