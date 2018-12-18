@@ -138,8 +138,8 @@ Binomial Queue Representation
               ((or (null? (car queue1)) (null? (car queue2))) (cond ((null? carry) (cons (link (car queue1) (car queue2)) (helper '() (cdr queue1) (cdr queue2))))
                                                                     (else (cons '() (helper (link carry (link (car queue1) (car queue2))) (cdr queue1) (cdr queue2))))))
               (else (cons carry (helper (link (car queue1) (car queue2)) (cdr queue1) (cdr queue2)))))))
-    (cond ((< (size queue1) (size queue2)) (helper '() (extend (- (size queue2) (size queue1)) queue1) queue2))
-          (else (helper '() queue1 (extend (- (size queue1) (size queue2)) queue2))))))
+    (cond ((< (qlength queue1) (qlength queue2)) (helper '() (extend (- (qlength queue2) (length queue1)) queue1) queue2))
+          (else (helper '() queue1 (extend (- (qlength queue1) (qlength queue2)) queue2))))))
 
 ; delete minimum element from queue
 (define deleteMin
@@ -162,11 +162,11 @@ Binomial Queue Representation
               (else (cons '() (helper (- n 1)))))))
     (append queue (helper n))))
 
-; return size of queue (number of trees it contains)
-(define size
+; return length of queue (number of trees it contains)
+(define qlength
   (lambda (queue)
     (cond ((null? queue) 0)
-          (else (+ 1 (size (cdr queue)))))))
+          (else (+ 1 (qlength (cdr queue)))))))
 
 ; find tree with root n
 (define find
